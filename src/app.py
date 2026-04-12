@@ -1,14 +1,13 @@
 from http import HTTPStatus
 
-from fastapi import FastAPI, Depends, HTTPException
-
-from sqlalchemy import insert, select
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.schemas.users import UserSchema
-from src.views.users import UserView
-from src.models.users import User 
 from src.database import get_session
+from src.models.users import User
+from src.schemas.users import UserSchema
+from src.views.users import UserView, UserListView
 
 app = FastAPI()
 
@@ -19,9 +18,10 @@ def hello():
 
 
 # USUARIOS
-@app.get("/usuarios")
-def get_users():
-    pass
+@app.get("/usuarios", status_code=HTTPStatus.OK, response_model=UserListView)
+def get_users(session: Session = Depends(get_session)):
+    users = session.scalars(select(User)).all()
+    return {"users": users}
 
 
 @app.get("/usuarios/{id}", status_code=HTTPStatus.OK)
@@ -34,7 +34,8 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
 
     db_user = session.scalar(
         select(User).where(
-            (User.username == user.username) | (User.user_email == user.user_email)
+            (User.username == user.username)
+            | (User.user_email == user.user_email)
         )
     )
 
@@ -42,19 +43,19 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         if db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="Username already exists."
+                detail="Username already exists.",
             )
         elif db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail="Use email already exists."
+                detail="Use email already exists.",
             )
-    
+
     db_user = User(
         username=user.username,
         user_email=user.user_email,
         phone_number=user.phone_number,
-        password=user.password
+        password=user.password,
     )
 
     session.add(db_user)
