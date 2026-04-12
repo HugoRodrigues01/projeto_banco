@@ -6,5 +6,6 @@ class UserView(BaseModel):
     username: str
     user_email: str
 
+
 class UserListView(BaseModel):
     users: list[UserView]

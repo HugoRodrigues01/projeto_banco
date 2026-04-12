@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from src.database import get_session
 from src.models.users import User
 from src.schemas.users import UserSchema
-from src.views.users import UserView, UserListView
+from src.views.users import UserListView, UserView
 
 app = FastAPI()
 
@@ -45,7 +45,7 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
                 status_code=HTTPStatus.CONFLICT,
                 detail="Username already exists.",
             )
-        elif db_user.username == user.username:
+        elif db_user.user_email == user.user_email:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail="Use email already exists.",
