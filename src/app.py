@@ -24,9 +24,17 @@ def get_users(session: Session = Depends(get_session)):
     return {"users": users}
 
 
-@app.get("/usuarios/{id}", status_code=HTTPStatus.OK)
-def get_user(id: int):
-    pass
+@app.get("/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView)
+def get_user(id: int, session: Session = Depends(get_session)):
+    user = session.scalar(select(User).where(User.user_id == id))
+    
+    if not user:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="User id not exists."
+        )
+
+    return user
 
 
 @app.post("/usuarios", status_code=HTTPStatus.CREATED, response_model=UserView)
