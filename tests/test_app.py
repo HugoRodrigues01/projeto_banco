@@ -8,7 +8,27 @@ def test_will_be_returned_ok_and_hello_world(client):
     assert response.json() == {"Message": "Hello World"}
 
 
-def test_get_users(client):
+def test_get_one_user(client, user):
+    result = client.get(
+        "/usuarios/1",
+    )
+
+    assert result.status_code == HTTPStatus.OK
+    assert result.json() == {
+        "user_id": 1,
+        "username": "naoexiste",
+        "user_email": "naoexiste@gmail.com",
+    }
+
+
+def test_check_if_user_exists(client, user):
+    result = client.get("/usuarios/12")
+
+    assert result.status_code == HTTPStatus.NOT_FOUND
+    assert result.json() == {"detail": "User id not exists."}
+
+
+def test_get_many_users(client):
     users = client.get("/usuarios/")
 
     assert users.status_code == HTTPStatus.OK

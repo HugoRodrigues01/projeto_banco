@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.database import get_session
@@ -27,11 +27,10 @@ def get_users(session: Session = Depends(get_session)):
 @app.get("/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView)
 def get_user(id: int, session: Session = Depends(get_session)):
     user = session.scalar(select(User).where(User.user_id == id))
-    
+
     if not user:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="User id not exists."
+            status_code=HTTPStatus.NOT_FOUND, detail="User id not exists."
         )
 
     return user
@@ -73,15 +72,15 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
     return db_user
 
 
-@app.put("/usuarios/{id}", status_code=HTTPStatus.CREATED, response_model=UserView)
+@app.put(
+    "/usuarios/{id}", status_code=HTTPStatus.CREATED, response_model=UserView
+)
 def update_user(
-    id: int, 
-    new_user: UserUpdateSchema, 
-    session: Session=Depends(get_session)
+    id: int,
+    new_user: UserUpdateSchema,
+    session: Session = Depends(get_session),
 ):
-    user = session.scalar(
-        select(User).where(User.user_id == id)
-    )
+    user = session.scalar(select(User).where(User.user_id == id))
 
     if user:
         update_user = user
@@ -96,28 +95,26 @@ def update_user(
 
     else:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="User do not exists."
+            status_code=HTTPStatus.NOT_FOUND, detail="User do not exists."
         )
 
     return update_user
 
 
-@app.delete("/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView)
-def delete_user(id: int, session: Session=Depends(get_session)):
+@app.delete(
+    "/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView
+)
+def delete_user(id: int, session: Session = Depends(get_session)):
 
-    user = session.scalar(
-        select(User).where(User.user_id == id)
-    )
-    
+    user = session.scalar(select(User).where(User.user_id == id))
+
     if user:
         session.delete(user)
         session.commit()
     else:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="User do not exists."
-        )   
+            status_code=HTTPStatus.NOT_FOUND, detail="User do not exists."
+        )
 
     return user
 
