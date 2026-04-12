@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import select, update
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from src.database import get_session
@@ -103,9 +103,23 @@ def update_user(
     return update_user
 
 
-@app.delete("/usuarios/{id}")
-def delete_user(id: int):
-    pass
+@app.delete("/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView)
+def delete_user(id: int, session: Session=Depends(get_session)):
+
+    user = session.scalar(
+        select(User).where(User.user_id == id)
+    )
+    
+    if user:
+        session.delete(user)
+        session.commit()
+    else:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail="User do not exists."
+        )   
+
+    return user
 
 
 # CLIENTS
