@@ -47,6 +47,39 @@ def test_delete_not_found_user(client):
     assert response.json() == {"detail": "User do not exists."}
 
 
+def test_update_user(client, user):
+    response = client.put(
+        "/usuarios/1",
+        json={
+            "username": "trocar",
+            "phone_number": 98981330984,
+            "user_email": "naoexiste@gmail.com",
+            "password": "teste123",
+        },
+    )
+
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {
+        "user_id": 1,
+        "username": "trocar",
+        "user_email": "naoexiste@gmail.com",
+    }
+
+
+def test_update_not_found_user(client):
+    response = client.put(
+        "/usuarios/1",
+        json={
+            "username": "trocar",
+            "phone_number": 98981330984,
+            "user_email": "naoexiste@gmail.com",
+            "password": "teste123",
+        },
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "User do not exists."}
+
+
 def test_get_many_users(client):
     users = client.get("/usuarios/")
 
