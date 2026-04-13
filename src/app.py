@@ -19,8 +19,10 @@ def hello():
 
 # USUARIOS
 @app.get("/usuarios", status_code=HTTPStatus.OK, response_model=UserListView)
-def get_users(session: Session = Depends(get_session)):
-    users = session.scalars(select(User)).all()
+def get_users(
+    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+):
+    users = session.scalars(select(User).offset(skip).limit(limit)).all()
     return {"users": users}
 
 

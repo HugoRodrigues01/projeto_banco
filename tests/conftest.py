@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from src.app import app
 from src.database import get_session
-from src.models.users import table_registry
+from src.models.users import User, table_registry
 
 
 @pytest.fixture
@@ -37,15 +37,15 @@ def session():
 
 
 @pytest.fixture
-def user(client):
-    user = client.post(
-        "/usuarios/",
-        json={
-            "username": "naoexiste",
-            "phone_number": 98981330984,
-            "user_email": "naoexiste@gmail.com",
-            "password": "teste123",
-        },
+def user(session):
+    user = User(
+        username="naoexiste",
+        phone_number=98981330984,
+        user_email="naoexiste@gmail.com",
+        password="teste123",
     )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
 
     return user

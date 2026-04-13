@@ -117,7 +117,6 @@ def test_check_if_username_already_exists(client, user):
         },
     )
 
-    assert user.status_code == HTTPStatus.CREATED
     assert user2.status_code == HTTPStatus.CONFLICT
     assert user2.json() == {"detail": "Username already exists."}
 
