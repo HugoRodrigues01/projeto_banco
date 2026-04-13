@@ -28,6 +28,25 @@ def test_check_if_user_exists(client, user):
     assert result.json() == {"detail": "User id not exists."}
 
 
+def test_delete_user(client, user):
+    response = client.delete("/usuarios/1")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        "user_id": 1,
+        "username": "naoexiste",
+        "user_email": "naoexiste@gmail.com",
+    }
+
+
+def test_delete_not_found_user(client):
+
+    response = client.delete("/usuarios/1")
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {"detail": "User do not exists."}
+
+
 def test_get_many_users(client):
     users = client.get("/usuarios/")
 
