@@ -1,6 +1,11 @@
 from jwt import decode
 
-from src.security import SECRET_KEY, create_access_token
+from src.security import (
+    SECRET_KEY,
+    create_access_token,
+    create_password_hash,
+    verify_password,
+)
 
 
 def test_create_access_token():
@@ -11,3 +16,10 @@ def test_create_access_token():
 
     assert decoded["test"] == data["test"]
     assert "exp" in decoded
+
+
+def test_create_an_hash_fo_password_and_decode():
+    password = "test123"
+    hashed_password = create_password_hash(password)
+
+    assert verify_password(password, hashed_password)
