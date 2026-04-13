@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.database import get_session
+from src.security import create_password_hash
 from src.models.users import User
 from src.schemas.users import UserSchema, UserUpdateSchema
 from src.views.users import UserListView, UserView
@@ -64,7 +65,7 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
         username=user.username,
         user_email=user.user_email,
         phone_number=user.phone_number,
-        password=user.password,
+        password=create_password_hash(user.password),
     )
 
     session.add(db_user)
