@@ -8,3 +8,6 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str = Field(init=False)
+    SECRET_KEY: str
+    ALGORITHIM: str
+    ACCESS_TOKEN_EXPIRE_MINUTS: int

@@ -12,15 +12,16 @@ from sqlalchemy.orm import Session
 
 from src.database import get_session
 from src.models.users import User
+from src.settings import Settings
 
-SECRET_KEY = "my-secreet-key-for-sha256bckdbsbwi2023724hixh9jsdbb2839nbcVUYUDGHIubdqwiu"
-ALGORITHIM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTS = 30
+SECRET_KEY = Settings().SECRET_KEY
+ALGORITHIM = Settings().ALGORITHIM
+ACCESS_TOKEN_EXPIRE_MINUTS = Settings().ACCESS_TOKEN_EXPIRE_MINUTS
 
 logging.basicConfig(level=logging.DEBUG)
 
 pwd_context = PasswordHash.recommended()
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/token")
 
 
 def get_current_user(

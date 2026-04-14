@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from src.app import app
 from src.database import get_session
 from src.models.users import User, table_registry
-from src.security import create_password_hash
+from src.security import create_access_token, create_password_hash
 
 
 @pytest.fixture
@@ -50,3 +50,9 @@ def user(session):
     session.refresh(user)
 
     return user
+
+
+@pytest.fixture
+def token(user):
+    token_access = create_access_token({"sub": user.user_email})
+    return token_access

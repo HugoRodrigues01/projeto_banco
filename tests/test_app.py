@@ -28,8 +28,10 @@ def test_check_if_user_exists(client, user):
     assert result.json() == {"detail": "User id not exists."}
 
 
-def test_delete_user(client, user):
-    response = client.delete("/usuarios/1")
+def test_delete_user(client, token):
+    response = client.delete(
+        "/usuarios/1", headers={"Authorization": f"Bearer {token}"}
+    )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
@@ -41,13 +43,15 @@ def test_delete_user(client, user):
 
 def test_delete_not_found_user(client):
 
-    response = client.delete("/usuarios/1")
+    response = client.delete(
+        "/usuarios/1", headers={"Authorization": "Bearer "}
+    )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "User do not exists."}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {"detail": "Could not validate credential."}
 
 
-def test_update_user(client, user):
+def test_update_user(client, token):
     response = client.put(
         "/usuarios/1",
         json={
@@ -56,6 +60,7 @@ def test_update_user(client, user):
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
         },
+        headers={"Authorization": f"Bearer {token}"}
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -75,9 +80,10 @@ def test_update_not_found_user(client):
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
         },
+        headers={"Authorization": "Bearer "}
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "User do not exists."}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {"detail": "Could not validate credential."}
 
 
 def test_get_many_users(client):
