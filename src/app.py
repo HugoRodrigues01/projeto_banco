@@ -7,9 +7,14 @@ from sqlalchemy.orm import Session
 
 from src.database import get_session
 from src.models.users import User
-from src.schemas.users import UserSchema, UserUpdateSchema
 from src.schemas.token import TokenSchema
-from src.security import create_password_hash, verify_password, create_access_token
+from src.schemas.users import UserSchema, UserUpdateSchema
+from src.security import (
+    create_access_token,
+    create_password_hash,
+    get_current_user,
+    verify_password,
+)
 from src.views.users import UserListView, UserView
 
 app = FastAPI()
@@ -19,26 +24,29 @@ app = FastAPI()
 def hello():
     return {"Message": "Hello World"}
 
-@app.get("/token", response_model=TokenSchema)
+
+@app.post("/token", response_model=TokenSchema)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    session: Session=Depends(get_session)
+    session: Session = Depends(get_session),
 ):
-    
-    user = session.scalar(select(User).where(User.user_email == form_data.username))
+
+    user = session.scalar(
+        select(User).where(User.user_email == form_data.username)
+    )
 
     if not user:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Iconrrect email or password"
+            detail="Iconrrect email or password",
         )
-    
+
     if not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Iconrrect email or password"
+            detail="Iconrrect email or password",
         )
-    
+
     access_token = create_access_token({"sub": user.user_email})
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -107,44 +115,48 @@ def update_user(
     id: int,
     new_user: UserUpdateSchema,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ):
-    user = session.scalar(select(User).where(User.user_id == id))
-
-    if user:
-        update_user = user
-        update_user.username = new_user.username
-        update_user.user_email = new_user.user_email or user.user_email
-        update_user.password = new_user.password or user.password
-        update_user.phone_number = new_user.phone_number or user.phone_number
-
-        session.add(update_user)
-        session.commit()
-        session.refresh(update_user)
-
-    else:
+    if current_user.user_id != id:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="User do not exists."
+            status_code=HTTPStatus.FORBIDDEN, detail="Not enough permissions"
         )
 
-    return update_user
+    current_user.username = new_user.username
+    current_user.user_email = (
+        new_user.user_email or current_user.user.user_email
+    )
+    current_user.password = (
+        create_password_hash(new_user.password) or current_user.password
+    )
+    current_user.phone_number = (
+        new_user.phone_number or current_user.phone_number
+    )
+
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return current_user
 
 
 @app.delete(
     "/usuarios/{id}", status_code=HTTPStatus.OK, response_model=UserView
 )
-def delete_user(id: int, session: Session = Depends(get_session)):
-
-    user = session.scalar(select(User).where(User.user_id == id))
-
-    if user:
-        session.delete(user)
-        session.commit()
-    else:
+def delete_user(
+    id: int, session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.user_id != id:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail="User do not exists."
+            status_code=HTTPStatus.FORBIDDEN,
+            detail="Not enough permissions"
         )
 
-    return user
+    session.delete(current_user)
+    session.commit()
+
+    return current_user
 
 
 # CLIENTS

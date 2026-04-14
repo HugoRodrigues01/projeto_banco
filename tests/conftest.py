@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from src.app import app
 from src.database import get_session
 from src.models.users import User, table_registry
+from src.security import create_password_hash
 
 
 @pytest.fixture
@@ -42,7 +43,7 @@ def user(session):
         username="naoexiste",
         phone_number=98981330984,
         user_email="naoexiste@gmail.com",
-        password="teste123",
+        password=create_password_hash("teste123"),
     )
     session.add(user)
     session.commit()

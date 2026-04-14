@@ -145,3 +145,15 @@ def test_check_if_user_email_already_exists(client):
     assert user.status_code == HTTPStatus.CREATED
     assert user2.status_code == HTTPStatus.CONFLICT
     assert user2.json() == {"detail": "Use email already exists."}
+
+
+def test_get_token(client, user):
+    response = client.post(
+        "/token",
+        data={"username": user.user_email, "password": "teste123"},
+    )
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert "access_token" in token
+    assert "token_type" in token
