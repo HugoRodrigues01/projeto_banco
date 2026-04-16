@@ -3,8 +3,7 @@ from http import HTTPStatus
 
 def test_token_with_worng_email(client, user):
     request = client.post(
-        "/token", data={
-            "username": "@gmail.com", "password": "string"}
+        "/token", data={"username": "@gmail.com", "password": "string"}
     )
 
     assert request.json() == {"detail": "Iconrrect email or password"}
@@ -13,8 +12,8 @@ def test_token_with_worng_email(client, user):
 
 def test_token_with_worng_password(client, user):
     request = client.post(
-        "/token", data={
-            "username": "naoexiste@gmail.com", "password": "senhaerrada"}
+        "/token",
+        data={"username": "naoexiste@gmail.com", "password": "senhaerrada"},
     )
 
     assert request.json() == {"detail": "Iconrrect email or password"}

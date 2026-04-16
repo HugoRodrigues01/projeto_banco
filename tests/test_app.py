@@ -51,6 +51,15 @@ def test_delete_not_found_user(client):
     assert response.json() == {"detail": "Could not validate credential."}
 
 
+def test_delete_user_without_permission(client, token):
+    response = client.delete(
+        "/usuarios/100", headers={"Authorization": f"Bearer {token}"}
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Not enough permissions"}
+
+
 def test_update_user(client, token):
     response = client.put(
         "/usuarios/1",
@@ -60,7 +69,7 @@ def test_update_user(client, token):
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
         },
-        headers={"Authorization": f"Bearer {token}"}
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == HTTPStatus.CREATED
@@ -80,10 +89,26 @@ def test_update_not_found_user(client):
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
         },
-        headers={"Authorization": "Bearer "}
+        headers={"Authorization": "Bearer "},
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {"detail": "Could not validate credential."}
+
+
+def test_update_user_without_permission(client, token):
+    response = client.put(
+        "/usuarios/1000",
+        json={
+            "username": "trocar",
+            "phone_number": 98981330984,
+            "user_email": "naoexiste@gmail.com",
+            "password": "teste123",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {"detail": "Not enough permissions"}
 
 
 def test_get_many_users(client):

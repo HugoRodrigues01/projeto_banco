@@ -9,5 +9,5 @@ table_registry.metadata.create_all(engine)
 
 
 def get_session():
-    with Session(engine) as session:
+    with Session(engine) as session:  # pragma: no cover
         yield session
