@@ -53,6 +53,21 @@ def user(session):
 
 
 @pytest.fixture
+def user2(session):
+    user = User(
+        username="naoexiste2",
+        phone_number=98981330984,
+        user_email="naoexiste2@gmail.com",
+        password=create_password_hash("teste123"),
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
+
+
+@pytest.fixture
 def token(user):
     token_access = create_access_token({"sub": user.user_email})
     return token_access
