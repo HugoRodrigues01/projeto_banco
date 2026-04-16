@@ -17,7 +17,6 @@ def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
 ):
-
     user = session.scalar(
         select(User).where(User.user_email == form_data.username)
     )

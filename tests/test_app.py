@@ -42,7 +42,6 @@ def test_delete_user(client, token):
 
 
 def test_delete_not_found_user(client):
-
     response = client.delete(
         "/usuarios/1", headers={"Authorization": "Bearer "}
     )
@@ -137,7 +136,6 @@ def test_create_user(client):
 
 
 def test_check_if_username_already_exists(client, user):
-
     user2 = client.post(
         "/usuarios/",
         json={

@@ -35,7 +35,6 @@ def get_user(id: int, session: Session = Depends(get_session)):
 
 @router.post("/", status_code=HTTPStatus.CREATED, response_model=UserView)
 def create_user(user: UserSchema, session: Session = Depends(get_session)):
-
     db_user = session.scalar(
         select(User).where(
             (User.username == user.username)
