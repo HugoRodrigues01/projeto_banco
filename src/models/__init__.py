@@ -1,0 +1,6 @@
+from sqlalchemy.orm import registry
+
+table_registry = registry()
+
+
+from . import clients, users
