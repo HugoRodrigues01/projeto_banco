@@ -20,7 +20,7 @@ def test_get_one_user(client, user):
         "user_email": "naoexiste@gmail.com",
         "data_nascimento": "2004-02-14",
         "sexo_cliente": "M",
-        "user_cpf": "12345678900"
+        "user_cpf": "12345678900",
     }
 
 
@@ -43,7 +43,7 @@ def test_delete_user(client, token):
         "user_email": "naoexiste@gmail.com",
         "data_nascimento": "2004-02-14",
         "sexo_cliente": "M",
-        'user_cpf': '12345678900'
+        "user_cpf": "12345678900",
     }
 
 
@@ -74,7 +74,7 @@ def test_update_user(client, token):
             "user_email": "update@gmail.com",
             "password": "teste123",
             "data_nascimento": "2004-02-14",
-            "sexo_cliente": "F"
+            "sexo_cliente": "F",
         },
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -114,7 +114,7 @@ def test_update_user_without_permission(client, token):
             "user_email": "update@gmail.com",
             "password": "teste123",
             "data_nascimento": "2004-02-14",
-            "sexo_cliente": "F"
+            "sexo_cliente": "F",
         },
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -150,7 +150,7 @@ def test_create_user(client):
         "sexo_cliente": "M",
         "username": "naoexiste",
         "user_email": "naoexiste@gmail.com",
-        "user_cpf": "12345612378"
+        "user_cpf": "12345612378",
     }
 
 
@@ -202,3 +202,35 @@ def test_check_if_user_email_already_exists(client):
     assert user.status_code == HTTPStatus.CREATED
     assert user2.status_code == HTTPStatus.CONFLICT
     assert user2.json() == {"detail": "Use email already exists."}
+
+
+def test_check_if_user_cpf_already_exists(client):
+    user = client.post(
+        "/usuarios/",
+        json={
+            "username": "naoexiste",
+            "phone_number": 98981330984,
+            "user_email": "teste@gmail.com",
+            "password": "teste123",
+            "user_cpf": "12345678900",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
+        },
+    )
+
+    user2 = client.post(
+        "/usuarios/",
+        json={
+            "username": "newname",
+            "phone_number": 98981330984,
+            "user_email": "naoexiste@gmail.com",
+            "password": "teste123",
+            "user_cpf": "12345678900",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
+        },
+    )
+
+    assert user.status_code == HTTPStatus.CREATED
+    assert user2.status_code == HTTPStatus.CONFLICT
+    assert user2.json() == {"detail": "Use cpf already exists."}
