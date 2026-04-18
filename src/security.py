@@ -39,14 +39,14 @@ def get_current_user(
         logging.info("Entrando no try de get_current_user")
         payload = decode(token, SECRET_KEY, algorithms=[ALGORITHIM])
         logging.debug(f"payload: {payload}")
-        sub_email = payload.get("sub")
+        sub_cpf = payload.get("sub")
 
-        if not sub_email:
+        if not sub_cpf:
             raise credential_exception
     except DecodeError:
         raise credential_exception
 
-    user = session.scalar(select(User).where(User.user_email == sub_email))
+    user = session.scalar(select(User).where(User.user_cpf == sub_cpf))
 
     if not user:
         raise credential_exception

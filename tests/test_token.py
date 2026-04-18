@@ -1,29 +1,29 @@
 from http import HTTPStatus
 
 
-def test_token_with_worng_email(client, user):
+def test_token_with_worng_cpf(client, user):
     request = client.post(
-        "/token", data={"username": "@gmail.com", "password": "string"}
+        "/token", data={"username": "12345678932", "password": "teste123"}
     )
 
-    assert request.json() == {"detail": "Iconrrect email or password"}
+    assert request.json() == {"detail": "Iconrrect cpf or password"}
     assert request.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_token_with_worng_password(client, user):
     request = client.post(
         "/token",
-        data={"username": "naoexiste@gmail.com", "password": "senhaerrada"},
+        data={"username": "12345678900", "password": "senhaerrada"},
     )
 
-    assert request.json() == {"detail": "Iconrrect email or password"}
+    assert request.json() == {"detail": "Iconrrect cpf or password"}
     assert request.status_code == HTTPStatus.UNAUTHORIZED
 
 
 def test_get_token(client, user):
     response = client.post(
         "/token",
-        data={"username": user.user_email, "password": "teste123"},
+        data={"username": user.user_cpf, "password": "teste123"},
     )
     token = response.json()
 

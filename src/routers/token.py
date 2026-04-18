@@ -18,20 +18,20 @@ def login_for_access_token(
     session: Session = Depends(get_session),
 ):
     user = session.scalar(
-        select(User).where(User.user_email == form_data.username)
+        select(User).where(User.user_cpf == form_data.username)
     )
 
     if not user:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Iconrrect email or password",
+            detail="Iconrrect cpf or password",
         )
 
     if not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
-            detail="Iconrrect email or password",
+            detail="Iconrrect cpf or password",
         )
 
-    access_token = create_access_token({"sub": user.user_email})
+    access_token = create_access_token({"sub": user.user_cpf})
     return {"access_token": access_token, "token_type": "bearer"}

@@ -37,8 +37,9 @@ def get_user(id: int, session: Session = Depends(get_session)):
 def create_user(user: UserSchema, session: Session = Depends(get_session)):
     db_user = session.scalar(
         select(User).where(
-            (User.username == user.username)
+            (User.user_cpf == user.user_cpf)
             | (User.user_email == user.user_email)
+            | (User.username == user.username)
         )
     )
 
@@ -48,7 +49,12 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
                 status_code=HTTPStatus.CONFLICT,
                 detail="Username already exists.",
             )
-        elif db_user.user_email == user.user_email:
+        if db_user.user_cpf == user.user_cpf:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Use cpf already exists.",
+            )
+        if db_user.user_email == user.user_email:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
                 detail="Use email already exists.",
@@ -57,6 +63,9 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
     db_user = User(
         username=user.username,
         user_email=user.user_email,
+        user_cpf=user.user_cpf,
+        data_nascimento=user.data_nascimento,
+        sexo_cliente=user.sexo_cliente,
         phone_number=user.phone_number,
         password=create_password_hash(user.password),
     )
@@ -89,6 +98,13 @@ def update_user(
     )
     current_user.phone_number = (
         new_user.phone_number or current_user.phone_number
+    )
+    current_user.sexo_cliente = (
+        new_user.sexo_cliente or current_user.sexo_cliente
+    )
+
+    current_user.data_nascimento = (
+        new_user.data_nascimento or current_user.data_nascimento
     )
 
     session.add(current_user)

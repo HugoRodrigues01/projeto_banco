@@ -18,6 +18,9 @@ def test_get_one_user(client, user):
         "user_id": 1,
         "username": "naoexiste",
         "user_email": "naoexiste@gmail.com",
+        "data_nascimento": "2004-02-14",
+        "sexo_cliente": "M",
+        "user_cpf": "12345678900"
     }
 
 
@@ -38,6 +41,9 @@ def test_delete_user(client, token):
         "user_id": 1,
         "username": "naoexiste",
         "user_email": "naoexiste@gmail.com",
+        "data_nascimento": "2004-02-14",
+        "sexo_cliente": "M",
+        'user_cpf': '12345678900'
     }
 
 
@@ -63,10 +69,12 @@ def test_update_user(client, token):
     response = client.put(
         "/usuarios/1",
         json={
-            "username": "trocar",
-            "phone_number": 98981330984,
-            "user_email": "naoexiste@gmail.com",
+            "username": "hugoupdate",
+            "phone_number": 12345612378,
+            "user_email": "update@gmail.com",
             "password": "teste123",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "F"
         },
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -74,8 +82,11 @@ def test_update_user(client, token):
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         "user_id": 1,
-        "username": "trocar",
-        "user_email": "naoexiste@gmail.com",
+        "user_cpf": "12345678900",
+        "username": "hugoupdate",
+        "user_email": "update@gmail.com",
+        "data_nascimento": "2004-02-14",
+        "sexo_cliente": "F",
     }
 
 
@@ -98,10 +109,12 @@ def test_update_user_without_permission(client, token):
     response = client.put(
         "/usuarios/1000",
         json={
-            "username": "trocar",
-            "phone_number": 98981330984,
-            "user_email": "naoexiste@gmail.com",
+            "username": "hugoupdate",
+            "phone_number": 12345612378,
+            "user_email": "update@gmail.com",
             "password": "teste123",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "F"
         },
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -124,14 +137,20 @@ def test_create_user(client):
             "phone_number": 98981330984,
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
+            "user_cpf": "12345612378",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
         },
     )
 
     assert user.status_code == HTTPStatus.CREATED
     assert user.json() == {
         "user_id": 1,
+        "data_nascimento": "2004-02-14",
+        "sexo_cliente": "M",
         "username": "naoexiste",
         "user_email": "naoexiste@gmail.com",
+        "user_cpf": "12345612378"
     }
 
 
@@ -143,6 +162,9 @@ def test_check_if_username_already_exists(client, user):
             "phone_number": 98981330984,
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
+            "user_cpf": "12345612378",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
         },
     )
 
@@ -158,6 +180,9 @@ def test_check_if_user_email_already_exists(client):
             "phone_number": 98981330984,
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
+            "user_cpf": "12345678900",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
         },
     )
 
@@ -168,6 +193,9 @@ def test_check_if_user_email_already_exists(client):
             "phone_number": 98981330984,
             "user_email": "naoexiste@gmail.com",
             "password": "teste123",
+            "user_cpf": "1723289129",
+            "data_nascimento": "2004-02-14",
+            "sexo_cliente": "M",
         },
     )
 

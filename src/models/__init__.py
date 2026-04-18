@@ -1,6 +1,6 @@
-from sqlalchemy.orm import registry
+from src.models import users
+from src.models.registry import table_registry
 
-table_registry = registry()
+metadata = table_registry.metadata
 
-
-from . import clients, users
+__all__ = ["users"]
