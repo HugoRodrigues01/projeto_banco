@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.app import app
 from src.database import get_session
+from src.models.banks import Bank
 from src.models.registry import table_registry
 from src.models.users import SexoCliente, User
 from src.security import create_access_token, create_password_hash
@@ -74,6 +75,17 @@ def user2(session):
     session.refresh(user)
 
     return user
+
+
+@pytest.fixture
+def bank(session):
+    bank = Bank(bank_name="BancoTeste S.A")
+
+    session.add(bank)
+    session.commit()
+    session.refresh(bank)
+
+    return bank
 
 
 @pytest.fixture
