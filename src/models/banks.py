@@ -1,10 +1,13 @@
+from typing import TYPE_CHECKING, List
 from datetime import datetime
 
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.registry import table_registry
 
+if TYPE_CHECKING:
+    from src.models.acounts import Acount
 
 @table_registry.mapped_as_dataclass
 class Bank:
@@ -18,3 +21,5 @@ class Bank:
     updated_at: Mapped[datetime] = mapped_column(
         init=False, onupdate=func.now(), server_default=func.now()
     )
+
+    acount: Mapped[List["Acount"]] = relationship(back_populates="bank")
