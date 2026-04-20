@@ -1,10 +1,10 @@
-from typing import TYPE_CHECKING
-from src.models.registry import table_registry
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey, func
 from datetime import datetime
+from typing import TYPE_CHECKING
 
+from sqlalchemy import ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.models.registry import table_registry
 
 if TYPE_CHECKING:
     from src.models.banks import Bank
@@ -12,13 +12,13 @@ if TYPE_CHECKING:
 
 
 @table_registry.mapped_as_dataclass
-class Acount:
+class Account:
     __tablename__ = "table_conta"
 
     id_conta: Mapped[int] = mapped_column(init=False, primary_key=True)
     agencia_conta: Mapped[int] = mapped_column(nullable=False, unique=True)
     banco_id: Mapped[int] = mapped_column(ForeignKey("table_banco.id_bank"))
-    id_usuario: Mapped[int] = mapped_column(ForeignKey("table_user.user_id"))
+    user_cpf: Mapped[str] = mapped_column(ForeignKey("table_user.user_cpf"))
     saldo: Mapped[float] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now()
@@ -27,7 +27,10 @@ class Acount:
         init=False, onupdate=func.now(), server_default=func.now()
     )
 
-
     # relationship
-    bank: Mapped["Bank"] = relationship("acount")
-    user: Mapped["User"] = relationship("acount")
+    bank: Mapped["Bank"] = relationship(
+        "Bank", back_populates="account", init=False
+    )
+    user: Mapped["User"] = relationship(
+        "User", back_populates="account", init=False
+    )

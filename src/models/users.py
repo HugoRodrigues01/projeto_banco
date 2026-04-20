@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, List
 from datetime import date, datetime
 from enum import Enum
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,7 +8,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.models.registry import table_registry
 
 if TYPE_CHECKING:
-    from src.models.acounts import Acount
+    from src.models.accounts import Account
+
 
 class SexoCliente(Enum):
     masculino = "M"
@@ -35,4 +36,6 @@ class User:
         init=False, onupdate=func.now(), server_default=func.now()
     )
 
-    acount: Mapped[List["Acount"]] = relationship("user")
+    account: Mapped[List["Account"]] = relationship(
+        "Account", back_populates="user", init=False
+    )

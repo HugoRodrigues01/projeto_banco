@@ -25,12 +25,12 @@ def upgrade() -> None:
     sa.Column('id_conta', sa.Integer(), nullable=False),
     sa.Column('agencia_conta', sa.Integer(), nullable=False),
     sa.Column('banco_id', sa.Integer(), nullable=False),
-    sa.Column('id_usuario', sa.Integer(), nullable=False),
+    sa.Column('user_cpf', sa.String(), nullable=False),
     sa.Column('saldo', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.ForeignKeyConstraint(['banco_id'], ['table_banco.id_bank'], ),
-    sa.ForeignKeyConstraint(['id_usuario'], ['table_user.user_id'], ),
+    sa.ForeignKeyConstraint(['user_cpf'], ['table_user.user_cpf'], ),
     sa.PrimaryKeyConstraint('id_conta'),
     sa.UniqueConstraint('agencia_conta')
     )

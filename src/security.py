@@ -28,6 +28,7 @@ def get_current_user(
     session: Session = Depends(get_session),
     token: str = Depends(oauth2_schema),
 ):
+    logging.debug("Estou no get_current_user")
     # Criando uma única variação de erro possível
     credential_exception = HTTPException(
         status_code=HTTPStatus.UNAUTHORIZED,
