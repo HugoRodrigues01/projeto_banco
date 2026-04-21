@@ -8,6 +8,7 @@ from src.models.registry import table_registry
 
 if TYPE_CHECKING:
     from src.models.banks import Bank
+    from src.models.transactions import Transactions
     from src.models.users import User
 
 
@@ -33,4 +34,19 @@ class Account:
     )
     user: Mapped["User"] = relationship(
         "User", back_populates="account", init=False
+    )
+
+    # transmissor_account: Mapped[list["Transactions"]] = relationship(
+    #     back_populates="transmissor_account_rel", init=False
+    # )
+
+    # destination_account: Mapped[list["Transactions"]] = relationship(
+    #     back_populates="destination_account_rel", init=False
+    # )
+
+    transacoes_enviadas: Mapped[list["Transactions"]] = relationship(
+        "Transactions",
+        back_populates="conta_origem",
+        # foreign_keys=[Transactions.conta_transmissora],
+        init=False,
     )

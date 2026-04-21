@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -6,3 +8,7 @@ class AccountView(BaseModel):
     agencia_conta: int
     user_cpf: str
     saldo: float
+
+
+class AccountListView(BaseModel):
+    accounts: List[AccountView]

@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from src.deps import T_Session, T_User
-from src.models.accounts import Account
 from src.schemas.accounts import AccountSchema
-from src.views.accounts import AccountView
+from src.views.accounts import AccountListView, AccountView
+
+from . import Account, Transactions
 
 router = APIRouter(prefix="/contas", tags=["contas"])
 
@@ -20,10 +21,29 @@ def get_account(session: T_Session, user: T_User):
     if not account:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail="User don´t hava an account."
+            detail="User don´t hava an account.",
         )
-    
+
     return account
+
+
+@router.get("/list", response_model=AccountListView)
+def get_accounts(session: T_Session):
+    accounts = session.scalars(select(Account)).all()
+
+    return {"accounts": accounts}
+
+@router.get("/extrato")
+def get_extract(session: T_Session, current_user: T_User):
+    current_account = session.scalar(
+        select(Account).where(Account.user_cpf == current_user.user_cpf)
+    )
+    extract = session.scalars(
+        select(Transactions)
+        .where(Transactions.conta_transmissora == current_account.agencia_conta)
+    ).all()
+
+    return {"extact": extract}
 
 
 @router.post("/", status_code=HTTPStatus.CREATED, response_model=AccountView)
@@ -57,4 +77,5 @@ def create_account(
 
 
 @router.post("/")
-def enable_disable_account(): pass
+def enable_disable_account():
+    pass
