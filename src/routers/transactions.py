@@ -23,7 +23,9 @@ def create_transaction(
     new_saldo: float = current_account.saldo
 
     destination_account = session.scalar(
-        select(Account).where(Account.current_account_conta == data.destination_account)
+        select(Account).where(
+            Account.current_account_conta == data.destination_account
+        )
     )
 
     if not current_account:
@@ -43,7 +45,7 @@ def create_transaction(
 
     elif data.tipo_transacao == TransactionType.saque:
         if new_saldo >= data.valor:
-           new_saldo -= data.valor
+            new_saldo -= data.valor
 
         else:
             raise HTTPException(
@@ -58,9 +60,9 @@ def create_transaction(
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT, detail="Saldo is not suffer."
             )
-        
+
     current_account.saldo = new_saldo
-    destination_account.saldo = destination_account.saldo + data.valor
+    destination_account.saldo += data.valor
     session.add(current_account)
     session.add(destination_account)
 

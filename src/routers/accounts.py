@@ -6,42 +6,34 @@ from sqlalchemy import select
 from src.deps import T_Session, T_User
 from src.schemas.accounts import AccountSchema
 from src.views.accounts import AccountListView, AccountView
+from src.services.account_service import AccountService
 
 from . import Account, Transactions
 
 router = APIRouter(prefix="/contas", tags=["contas"])
-
+account_service = AccountService()
 
 @router.get("/", status_code=HTTPStatus.OK, response_model=AccountView)
-def get_account(session: T_Session, user: T_User):
-    account = session.scalar(
-        select(Account).where(Account.user_cpf == user.user_cpf)
-    )
-
-    if not account:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail="User don´t hava an account.",
-        )
-
+def get_account(user: T_User, session: T_Session):
+    account = account_service.get_one(user.user_cpf, session)
+    print("Current account: ", account)
     return account
 
 
 @router.get("/list", response_model=AccountListView)
-def get_accounts(session: T_Session):
-    accounts = session.scalars(select(Account)).all()
+def get_accounts(session: T_Session, skip: int = 0, limit: int = 10):
+    accounts = account_service.get_many(session=session, skip=skip, limit=limit)
+
 
     return {"accounts": accounts}
 
+
 @router.get("/extrato")
 def get_extract(session: T_Session, current_user: T_User):
-    current_account = session.scalar(
-        select(Account).where(Account.user_cpf == current_user.user_cpf)
-    )
-    extract = session.scalars(
-        select(Transactions)
-        .where(Transactions.conta_transmissora == current_account.agencia_conta)
-    ).all()
+    current_account = account_service.get_one(current_user.user_cpf, session)
+    
+
+    extract = account_service.get_extract(session, agencia_conta=current_account.agencia_conta)
 
     return {"extact": extract}
 
