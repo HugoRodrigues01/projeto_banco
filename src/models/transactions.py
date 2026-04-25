@@ -43,17 +43,6 @@ class Transactions:
         init=False, onupdate=func.now(), server_default=func.now()
     )
 
-    # transmissor_account_rel: Mapped["Account"] = relationship(
-    #     "Account",
-    #     back_populates="transmissor_account",
-    #     foreign_keys=[conta_transmissora],
-    # )
-    # destination_account_rel: Mapped["Account"] = relationship(
-    #     "Account",
-    #     back_populates="destination_account",
-    #     foreign_keys=[conta_destino],
-    # )
-
     conta_origem: Mapped["Account"] = relationship(
         "Account",
         foreign_keys=[conta_transmissora],

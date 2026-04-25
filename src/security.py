@@ -11,9 +11,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.database import get_session
+from src.exceptions import ExpiredTokenError
 from src.models.users import User
 from src.settings import Settings
-from src.exceptions import ExpiredTokenError
 
 SECRET_KEY = Settings().SECRET_KEY
 ALGORITHIM = Settings().ALGORITHIM
@@ -47,8 +47,8 @@ def get_current_user(
             raise credential_exception
     except DecodeError:
         raise credential_exception
-    
-    except:
+
+    except Exception:
         raise ExpiredTokenError
 
     user = session.scalar(select(User).where(User.user_cpf == sub_cpf))

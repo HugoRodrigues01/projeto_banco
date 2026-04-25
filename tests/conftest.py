@@ -7,10 +7,20 @@ from sqlalchemy.orm import Session
 
 from src.app import app
 from src.database import get_session
+from src.models.accounts import Account
 from src.models.banks import Bank
 from src.models.registry import table_registry
+from src.models.transactions import PaymentType, Transactions, TransactionType
 from src.models.users import SexoCliente, User
 from src.security import create_access_token, create_password_hash
+
+# class TransactionFactory(factory.Factory):
+#     class Meta:
+#         model = Transactions
+
+#     tranmissor_account = factory.Sequence(lambda n: n * 1000)
+#     conta_destino = None
+#     valor
 
 
 @pytest.fixture
@@ -42,6 +52,28 @@ def session():
 
 
 @pytest.fixture
+def bank(session):
+    bank = Bank(bank_name="BancoTeste S.A")
+
+    session.add(bank)
+    session.commit()
+    session.refresh(bank)
+
+    return bank
+
+
+@pytest.fixture
+def bank2(session):
+    bank = Bank(bank_name="BancoTeste2 S.A")
+
+    session.add(bank)
+    session.commit()
+    session.refresh(bank)
+
+    return bank
+
+
+@pytest.fixture
 def user(session):
     user = User(
         username="naoexiste",
@@ -57,6 +89,22 @@ def user(session):
     session.refresh(user)
 
     return user
+
+
+@pytest.fixture
+def account(user, bank, session):
+    account_user = Account(
+        agencia_conta=12345,
+        banco_id=bank.id_bank,
+        user_cpf=user.user_cpf,
+        saldo=100,
+    )
+
+    session.add(account_user)
+    session.commit()
+    session.refresh(account_user)
+
+    return account_user
 
 
 @pytest.fixture
@@ -78,14 +126,51 @@ def user2(session):
 
 
 @pytest.fixture
-def bank(session):
-    bank = Bank(bank_name="BancoTeste S.A")
+def account2(user2, bank, session):
+    account_user2 = Account(
+        agencia_conta=56789,
+        banco_id=bank.id_bank,
+        user_cpf=user2.user_cpf,
+        saldo=100,
+    )
 
-    session.add(bank)
+    session.add(account_user2)
     session.commit()
-    session.refresh(bank)
+    session.refresh(account_user2)
 
-    return bank
+    return account_user2
+
+
+@pytest.fixture
+def transaction(account, account2, session):
+    transaction = Transactions(
+        conta_transmissora=account.agencia_conta,
+        conta_destino=account2.agencia_conta,
+        valor=10,
+        tipo_trasacao=TransactionType.transacao,
+        forma_pagamento=PaymentType.pix,
+    )
+
+    session.add(transaction)
+    session.commit()
+    session.refresh(transaction)
+
+    return transaction
+
+
+@pytest.fixture
+def transaction2(account, account2, session):
+    transaction = Transactions(
+        conta_transmissora=account.agencia_conta,
+        conta_destino=account2.agencia_conta,
+        valor=10,
+        tipo_trasacao=TransactionType.transacao,
+        forma_pagamento=PaymentType.pix,
+    )
+
+    session.add(transaction)
+    session.commit()
+    session.refresh(transaction)
 
 
 @pytest.fixture

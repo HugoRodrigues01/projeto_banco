@@ -1,31 +1,34 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from src.exceptions import ConflictError, NotFoundError
 from src.models.accounts import Account
 from src.models.banks import Bank
 from src.models.transactions import Transactions
 from src.schemas.accounts import AccountSchema
-from src.exceptions import NotFoundError, ConflictError
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 
 class AccountService:
-
+    @classmethod
     def get_accounts(self, cpf_user: int, session):
-        
+
         response = session.scalars(
             select(Account).where(Account.user_cpf == cpf_user)
         ).all()
 
         if not response:
-            raise NotFoundError(detail=f"Account with cpf user: {cpf_user}, not found.")
+            raise NotFoundError(
+                detail=f"Account with cpf user: {cpf_user}, not found."
+            )
 
         return response
-    
+
+    @classmethod
     def get_extract(self, bank_id, cpf_user, session: Session):
 
         agencia = session.scalar(
             select(Account).where(
-                (Account.banco_id == bank_id),
-                (Account.user_cpf == cpf_user)
+                (Account.banco_id == bank_id), (Account.user_cpf == cpf_user)
             )
         )
 
@@ -41,17 +44,17 @@ class AccountService:
         ).all()
 
         return response
-    
+
+    @classmethod
     def create(self, account_data: AccountSchema, cpf_user, session: Session):
         try:
             accounts = self.get_accounts(cpf_user, session)
             bank_list = [bank.banco_id for bank in accounts]
-           
+
             if account_data.banco_id not in bank_list:
                 raise ConflictError
-           
-        except:
 
+        except Exception:
             bank_exists = session.scalar(
                 select(Bank).where(Bank.id_bank == account_data.banco_id)
             )
@@ -74,6 +77,5 @@ class AccountService:
             return account
 
         raise ConflictError(
-            detail=f"User {cpf_user}, already have an account in the this bank."
+            detail=f"User {cpf_user},already have an account in the this bank."
         )
-
