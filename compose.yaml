@@ -6,7 +6,7 @@ services:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 2
     volumes:
       - pgdata:/var/lib/postgresql
     ports:

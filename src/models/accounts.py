@@ -17,7 +17,7 @@ class Account:
     __tablename__ = "table_conta"
 
     id_conta: Mapped[int] = mapped_column(init=False, primary_key=True)
-    agencia_conta: Mapped[int] = mapped_column(nullable=False, unique=True)
+    agencia_conta: Mapped[int] = mapped_column(nullable=False)
     banco_id: Mapped[int] = mapped_column(ForeignKey("table_banco.id_bank"))
     user_cpf: Mapped[str] = mapped_column(ForeignKey("table_user.user_cpf"))
     saldo: Mapped[float] = mapped_column()
