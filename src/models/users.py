@@ -2,7 +2,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import func
+from sqlalchemy import BigInteger, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.models.registry import table_registry
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from src.models.accounts import Account
 
 
-class SexoCliente(Enum):
+class SexoCliente(str, Enum):
     masculino = "M"
     feminino = "F"
     nao_informado = "NI"
@@ -25,7 +25,7 @@ class User:
     user_cpf: Mapped[str] = mapped_column(unique=True, nullable=False)
     username: Mapped[str] = mapped_column(unique=True)
     data_nascimento: Mapped[date] = mapped_column(nullable=False)
-    phone_number: Mapped[int]
+    phone_number: BigInteger = mapped_column(BigInteger())
     user_email: Mapped[str] = mapped_column(unique=True)
     sexo_cliente: Mapped[SexoCliente]
     password: Mapped[str]

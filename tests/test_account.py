@@ -63,7 +63,8 @@ def test_create_account_with_bank_id_not_exists(client, token):
 
 
 def test_create_account_already_exists_bank(
-        client, token, account, bank, user):
+    client, token, account, bank, user
+):
     response = client.post(
         "/contas",
         json={"agencia_conta": 12344, "banco_id": bank.id_bank, "saldo": 100},
@@ -73,10 +74,11 @@ def test_create_account_already_exists_bank(
     assert response.status_code == HTTPStatus.CONFLICT
     assert response.json() == {
         "detail": f"User {user.user_cpf},already \
-have an account in the this bank."}
+have an account in the this bank."
+    }
 
 
-def test_get_extract(client, token, bank, transaction):
+def test_get_extract(client, token, bank, transaction, account2):
     response = client.get(
         f"/contas/extrato/{bank.id_bank}",
         headers={"Authorization": f"Bearer {token}"},
@@ -86,15 +88,13 @@ def test_get_extract(client, token, bank, transaction):
     assert response.json() == {
         "extract": [
             {
-                "conta_destino": 56789,
-                "conta_origem": None,
-                "conta_transmissora": 12345,
+                "conta_destino": account2.id_conta,
+                "conta_transmissora": 1,
                 "created_at": transaction.created_at.isoformat(),
                 "forma_pagamento": "PIX",
                 "id_transacao": 1,
                 "tipo_trasacao": "TRA",
-                "updated_at": transaction.updated_at.isoformat(),
-                "valor": 10.0,
+                "valor": transaction.valor,
             }
         ]
     }
@@ -102,9 +102,9 @@ def test_get_extract(client, token, bank, transaction):
 
 def test_get_extract_with_worgn_id_bank(client, token, transaction):
     response = client.get(
-        "/contas/extrato/1332",
+        "/contas/extrato/12",
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {"detail": "Account of bank 1332 not exists."}
+    assert response.json() == {"detail": "Account of bank 12 not exists."}

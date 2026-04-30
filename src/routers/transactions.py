@@ -1,3 +1,4 @@
+import logging
 from http import HTTPStatus
 
 from fastapi import APIRouter, HTTPException
@@ -10,22 +11,21 @@ from src.views.transactions import TransactionView
 
 from . import Account
 
+logging.basicConfig(level=logging.DEBUG)
+
 router = APIRouter(prefix="/transacoes", tags=["transacoes"])
 
 
 @router.post("/", status_code=HTTPStatus.OK, response_model=TransactionView)
-def create_transaction(
+async def create_transaction(
     data: TransactionSchema, session: T_Session, current_user: T_User
 ):
-    current_account = session.scalar(
+    current_account = await session.scalar(
         select(Account).where(Account.user_cpf == current_user.user_cpf)
     )
-    new_saldo: float = current_account.saldo
 
-    destination_account = session.scalar(
-        select(Account).where(
-            Account.current_account_conta == data.destination_account
-        )
+    destination_account = await session.scalar(
+        select(Account).where(Account.id_conta == data.conta_destino)
     )
 
     if not current_account:
@@ -37,8 +37,10 @@ def create_transaction(
     if not destination_account:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=f"Account {data.destination_account} not found.",
+            detail=f"Account {data.conta_destino} not found.",
         )
+
+    new_saldo: float = current_account.saldo
 
     if data.tipo_transacao == TransactionType.deposito:
         new_saldo += data.valor
@@ -60,24 +62,25 @@ def create_transaction(
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT, detail="Saldo is not suffer."
             )
+        destination_account.saldo += data.valor
+        session.add(destination_account)
 
     current_account.saldo = new_saldo
-    destination_account.saldo += data.valor
+
     session.add(current_account)
-    session.add(destination_account)
 
     transaction = Transactions(
-        conta_transmissora=current_account.current_account_conta,
-        destination_account=data.destination_account,
+        conta_transmissora=current_account.id_conta,
+        conta_destino=data.conta_destino,
         forma_pagamento=data.forma_pagamento,
         tipo_trasacao=data.tipo_transacao,
         valor=data.valor,
     )
 
     session.add(transaction)
-    session.commit()
-    session.refresh(transaction)
-    session.refresh(destination_account)
-    session.refresh(current_account)
+    await session.commit()
+    await session.refresh(transaction)
+    await session.refresh(destination_account)
+    await session.refresh(current_account)
 
     return transaction

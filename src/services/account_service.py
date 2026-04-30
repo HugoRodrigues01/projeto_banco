@@ -1,5 +1,7 @@
+import logging
+
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.exceptions import ConflictError, NotFoundError
 from src.models.accounts import Account
@@ -7,55 +9,64 @@ from src.models.banks import Bank
 from src.models.transactions import Transactions
 from src.schemas.accounts import AccountSchema
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 class AccountService:
     @classmethod
-    def get_accounts(self, cpf_user: int, session):
+    async def get_accounts(self, cpf_user: int, session):
 
-        response = session.scalars(
+        response = await session.scalars(
             select(Account).where(Account.user_cpf == cpf_user)
-        ).all()
+        )
 
-        if not response:
+        responses = response.all()
+
+        if not responses:
             raise NotFoundError(
                 detail=f"Account with cpf user: {cpf_user}, not found."
             )
 
-        return response
+        return responses
 
     @classmethod
-    def get_extract(self, bank_id, cpf_user, session: Session):
+    async def get_extract(self, bank_id, cpf_user, session: AsyncSession):
 
-        agencia = session.scalar(
+        agencia = await session.scalar(
             select(Account).where(
                 (Account.banco_id == bank_id), (Account.user_cpf == cpf_user)
             )
         )
+
+        # logging.debug(f"Agencia {agencia.id_conta}")
 
         if not agencia:
             raise NotFoundError(
                 detail=f"Account of bank {bank_id} not exists."
             )
 
-        response = session.scalars(
+        response = await session.scalars(
             select(Transactions).where(
-                Transactions.conta_transmissora == agencia.agencia_conta
+                Transactions.conta_transmissora == agencia.id_conta
             )
-        ).all()
+        )
 
-        return response
+        returned = response
+        return returned.all()
 
     @classmethod
-    def create(self, account_data: AccountSchema, cpf_user, session: Session):
+    async def create(
+        self, account_data: AccountSchema, cpf_user, session: AsyncSession
+    ):
         try:
-            accounts = self.get_accounts(cpf_user, session)
+            accounts = await self.get_accounts(cpf_user, session)
             bank_list = [bank.banco_id for bank in accounts]
 
             if account_data.banco_id not in bank_list:
                 raise ConflictError
 
         except Exception:
-            bank_exists = session.scalar(
+            bank_exists = await session.scalar(
                 select(Bank).where(Bank.id_bank == account_data.banco_id)
             )
             if not bank_exists:
@@ -71,8 +82,8 @@ class AccountService:
             )
 
             session.add(account)
-            session.commit()
-            session.refresh(account)
+            await session.commit()
+            await session.refresh(account)
 
             return account
 

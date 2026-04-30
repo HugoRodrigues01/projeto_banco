@@ -17,12 +17,12 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @router.post("/", response_model=TokenSchema)
-def login_for_access_token(
+async def login_for_access_token(
     session: T_Session, form_data: OAuth2PasswordRequestForm = Depends()
 ):
     logging.debug("Estou no login_access_token")
     cpf = str(form_data.username)
-    user = session.scalar(select(User).where(User.user_cpf == cpf))
+    user = await session.scalar(select(User).where(User.user_cpf == cpf))
 
     if not user:
         raise HTTPException(

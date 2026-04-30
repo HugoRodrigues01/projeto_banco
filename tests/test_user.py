@@ -1,4 +1,7 @@
+import logging
 from http import HTTPStatus
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def test_will_be_returned_ok_and_hello_world(client):
@@ -35,6 +38,8 @@ def test_delete_user(client, token):
     response = client.delete(
         "/usuarios/1", headers={"Authorization": f"Bearer {token}"}
     )
+
+    # logging.info("Response: ", response)
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {

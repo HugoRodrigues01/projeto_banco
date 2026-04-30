@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 
 from src.routers import accounts, banks, token, transactions, users
@@ -8,6 +10,10 @@ app.include_router(token.router)
 app.include_router(banks.router)
 app.include_router(accounts.router)
 app.include_router(transactions.router)
+
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+print(DATABASE_URL)
 
 
 @app.get("/")

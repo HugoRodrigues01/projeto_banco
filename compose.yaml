@@ -1,0 +1,31 @@
+services:
+  banco_db:
+    container_name: banco_db
+    image: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./src/.env
+
+  projeto_banco_app:
+    container_name: projeto_banco
+    image: projeto_banco
+    entrypoint: ./entrypoint.sh
+    build: .
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - banco_db
+    env_file:
+      - ./src/.env
+
+volumes:
+  pgdata:

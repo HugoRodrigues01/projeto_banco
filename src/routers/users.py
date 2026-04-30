@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.database import get_session
+from src.deps import T_Session
 from src.models.users import User
 from src.schemas.users import UserSchema, UserUpdateSchema
 from src.security import create_password_hash, get_current_user
@@ -14,16 +15,18 @@ router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 
 
 @router.get("/", status_code=HTTPStatus.OK, response_model=UserListView)
-def get_users(
-    skip: int = 0, limit: int = 100, session: Session = Depends(get_session)
+async def get_users(
+    session: T_Session,
+    skip: int = 0,
+    limit: int = 100,
 ):
-    users = session.scalars(select(User).offset(skip).limit(limit)).all()
-    return {"users": users}
+    users = await session.scalars(select(User).offset(skip).limit(limit))
+    return {"users": users.all()}
 
 
 @router.get("/{id}", status_code=HTTPStatus.OK, response_model=UserView)
-def get_user(id: int, session: Session = Depends(get_session)):
-    user = session.scalar(select(User).where(User.user_id == id))
+async def get_user(id: int, session: T_Session):
+    user = await session.scalar(select(User).where(User.user_id == id))
 
     if not user:
         raise HTTPException(
@@ -34,8 +37,8 @@ def get_user(id: int, session: Session = Depends(get_session)):
 
 
 @router.post("/", status_code=HTTPStatus.CREATED, response_model=UserView)
-def create_user(user: UserSchema, session: Session = Depends(get_session)):
-    db_user = session.scalar(
+async def create_user(user: UserSchema, session: T_Session):
+    db_user = await session.scalar(
         select(User).where(
             (User.user_cpf == user.user_cpf)
             | (User.user_email == user.user_email)
@@ -71,8 +74,8 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
     )
 
     session.add(db_user)
-    session.commit()
-    session.refresh(db_user)
+    await session.commit()
+    await session.refresh(db_user)
 
     return db_user
 
@@ -115,9 +118,9 @@ def update_user(
 
 
 @router.delete("/{id}", status_code=HTTPStatus.OK, response_model=UserView)
-def delete_user(
+async def delete_user(
     id: int,
-    session: Session = Depends(get_session),
+    session: T_Session,
     current_user: User = Depends(get_current_user),
 ):
     if current_user.user_id != id:
@@ -126,6 +129,6 @@ def delete_user(
         )
 
     session.delete(current_user)
-    session.commit()
+    await session.commit()
 
     return current_user
