@@ -4,6 +4,11 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ALGORITHIM: ${{ secrets.ALGORITHIM }}
+      ACCESS_TOKEN_EXPIRE_MINUTS: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTS }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
 
       - name: Copiar os arquivos 
